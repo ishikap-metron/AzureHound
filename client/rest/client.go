@@ -45,7 +45,6 @@ type RestClient interface {
 }
 
 func NewRestClient(apiUrl string, config config.Config) (RestClient, error) {
-
 	if auth, err := url.Parse(config.AuthorityUrl()); err != nil {
 		return nil, err
 	} else if api, err := url.Parse(apiUrl); err != nil {
@@ -56,6 +55,8 @@ func NewRestClient(apiUrl string, config config.Config) (RestClient, error) {
 		var authenticator *Authenticator
 		if config.ManagedIdentity {
 			authenticator = NewManagedIdentityAuthenticator(config, auth, api, http)
+		} else if config.ManagedIdentitySDK {
+			authenticator = NewManagedIdentitySDKAuthenticator(config, api)
 		} else {
 			authenticator = NewGenericAuthenticator(config, auth, api)
 		}
@@ -73,12 +74,12 @@ func NewRestClient(apiUrl string, config config.Config) (RestClient, error) {
 }
 
 type restClient struct {
-	api            url.URL
-	http           *http.Client
-	tenant         string
-	token          Token
-	subId          []string
-	mgmtGroupId    []string
+	api           url.URL
+	http          *http.Client
+	tenant        string
+	token         Token
+	subId         []string
+	mgmtGroupId   []string
 	Authenticator *Authenticator
 }
 
